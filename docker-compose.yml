@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - DATABASE_URL=postgresql://postgres:safealert2024@db:5432/safealert
+      - NODE_ENV=production
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgis/postgis:15-3.3
+    environment:
+      POSTGRES_DB: safealert
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: safealert2024
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
